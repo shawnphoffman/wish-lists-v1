@@ -6,8 +6,6 @@ import InviteUser from '@/components/admin/InviteUser'
 import UserImpersonation from '@/components/admin/UserImpersonation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
-import AdminSendTestEmailButton from '@/components/admin/AdminSendTestEmailButton'
-
 export default async function Admin() {
 	// await new Promise(resolve => setTimeout(resolve, 50000))
 	return (
@@ -27,7 +25,6 @@ export default async function Admin() {
 							</CardHeader>
 							<CardContent className="flex flex-col gap-4 p-6 pt-0">
 								<AdminArchivePurchasedButton />
-								<AdminSendTestEmailButton />
 								<AdminExportButton />
 							</CardContent>
 						</Card>

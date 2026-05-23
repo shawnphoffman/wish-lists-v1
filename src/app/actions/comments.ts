@@ -2,11 +2,7 @@
 
 import { cookies } from 'next/headers'
 
-import { sendNewCommentEmail } from '@/utils/resend'
 import { createClient } from '@/utils/supabase/server'
-
-import { getListById } from './lists'
-import { getUserById, getUserEmail } from './users'
 
 export const createComment = async (prevState: any, formData: FormData) => {
 	'use server'
@@ -25,40 +21,11 @@ export const createComment = async (prevState: any, formData: FormData) => {
 		.select('*,user:user_id(user_id, display_name),listItem:list_items!item_comments_item_id_fkey(title,list_id,user_id)')
 		.single()
 
-	// console.log('createComment', { item_id: itemId, comments: comment, user_id: commentingUserID })
-	const [resp] = await Promise.all([
-		commentPromise,
-		//
-		// new Promise(resolve => setTimeout(resolve, 5000)),
-	])
+	const [resp] = await Promise.all([commentPromise])
 
 	const comm = resp.data
 
 	console.log(JSON.stringify(comm, null, 2))
-
-	// Only send email if insert succeeded; do not block response
-	if (!resp?.error && comm) {
-		const listResp = await getListById(comm.listItem.list_id)
-
-		if (listResp?.recipient_user_id !== comm.user.user_id) {
-			const recipientUser = await getUserById(listResp?.recipient_user_id)
-			const username = recipientUser?.display_name
-			const recipient = await getUserEmail(recipientUser?.user_id)
-			const commenter = comm.user.display_name
-			const itemTitle = comm.listItem.title
-			const listId = comm.listItem.list_id
-
-			if (username && recipient) {
-				// Fire and forget - don't await
-				console.log('createComment.email', { username, recipient, commenter, itemTitle, listId, itemId })
-				sendNewCommentEmail(username, recipient, commenter, comment, itemTitle, listId, Number(itemId)).catch(error =>
-					console.error('createComment.emailError 1', error)
-				)
-			} else {
-				console.error('createComment.emailError 2', { username, recipient })
-			}
-		}
-	}
 
 	return {
 		status: 'success',
